@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Live</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="viewer-page">
+    <main class="viewer-shell">
+      <section class="orientation-notice" aria-label="横画面案内">
+        <h1>横画面にしてください</h1>
+        <p>ライブ映像とコメントを同時に見るため、端末を横向きにしてください。</p>
+      </section>
+      <div class="mobile-toolbar-spacer">
+        <span>下にスクロールしてください</span>
+      </div>
+      <div class="viewer-layout">
+        <section class="viewer-main">
+          <section class="stage viewer-stage" aria-label="ライブ映像">
+            <video id="video" autoplay playsinline controls></video>
+            <div id="empty" class="empty viewer-empty">
+              <div class="status-dot" id="statusDot"></div>
+              <h1 id="title">Live</h1>
+              <p id="message">配信はまだ開始されていません。</p>
+              <div id="viewerGate" class="viewer-gate disabled">
+                <label class="viewer-name">
+                  名前
+                  <input id="viewerNameInput" maxlength="40" autocomplete="name" placeholder="表示名を入力" disabled />
+                </label>
+                <label class="viewer-name">
+                  パスワード
+                  <input id="viewerPasswordInput" type="password" maxlength="80" autocomplete="current-password" placeholder="視聴パスワード" disabled />
+                </label>
+                <button id="playButton" class="primary" type="button" disabled>視聴開始</button>
+              </div>
+            </div>
+          </section>
+            <div class="publisher-stats viewer-stats" aria-label="受信状態">
+            <span id="viewerStatServer">サーバー: -</span>
+            <span id="viewerStatResolution">画質: -</span>
+            <span id="viewerStatBitrate">通信量: -</span>
+            <span id="viewerStatCodec">Codec: -</span>
+            <span id="viewerStatLag">ラグ: -</span>
+          </div>
+        </section>
+
+        <aside class="viewer-side" aria-label="視聴者情報">
+          <section class="viewer-card comments-card">
+            <h2>コメント</h2>
+            <div id="commentsList" class="viewer-list comments-list"></div>
+            <form id="commentForm" class="comment-form">
+              <input id="commentInput" maxlength="500" placeholder="コメントを書く" disabled />
+              <button id="commentButton" class="primary" type="submit" disabled>送信</button>
+            </form>
+          </section>
+
+          <section class="viewer-card">
+            <h2>現在の視聴者</h2>
+            <div id="currentViewersList" class="viewer-list compact-list"></div>
+          </section>
+
+          <section class="viewer-card">
+            <h2>過去に見ていた視聴者</h2>
+            <div id="pastViewersList" class="viewer-list compact-list"></div>
+          </section>
+        </aside>
+      </div>
+    </main>
+    <script src="/viewer.js"></script>
+  </body>
+</html>

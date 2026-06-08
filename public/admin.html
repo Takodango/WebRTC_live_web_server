@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Live Admin</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <section id="loginPanel" class="panel narrow">
+        <h1>管理者ログイン</h1>
+        <label>
+          管理トークン
+          <input id="tokenInput" type="password" autocomplete="current-password" />
+        </label>
+        <button id="loginButton" class="primary" type="button">ログイン</button>
+        <p id="loginError" class="error"></p>
+      </section>
+
+      <section id="controlPanel" class="panel hidden">
+        <div class="admin-header">
+          <div>
+            <p id="liveState" class="eyebrow">確認中</p>
+            <h1>配信管理</h1>
+          </div>
+          <div class="admin-header-actions">
+            <button id="goPublisherButton" class="secondary" type="button">配信ページ</button>
+            <button id="goViewerButton" class="secondary" type="button">視聴ページ</button>
+            <button id="logoutButton" class="ghost" type="button">ログアウト</button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <label>
+            タイトル
+            <input id="titleInput" maxlength="80" />
+          </label>
+          <label>
+            表示メッセージ
+            <input id="messageInput" maxlength="240" />
+          </label>
+          <label>
+            視聴パスワード
+            <input id="viewerPasswordInput" type="password" maxlength="80" autocomplete="new-password" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="startButton" class="primary" type="button">配信開始</button>
+          <button id="stopButton" class="danger" type="button">配信停止</button>
+        </div>
+
+        <div class="publisher-stats admin-stream-stats" aria-label="サーバー受信状態">
+          <span id="adminStatServer">サーバー: -</span>
+          <span id="adminStatResolution">画質: -</span>
+          <span id="adminStatBitrate">通信量: -</span>
+          <span id="adminStatCodec">Codec: -</span>
+          <span id="adminStatLag">ラグ: -</span>
+        </div>
+
+        <div class="copy-row">
+          <label>
+            WebRTC WHIP URL
+            <input id="whipUrl" readonly />
+          </label>
+          <button id="copyWhip" class="secondary" type="button">コピー</button>
+        </div>
+
+        <div class="copy-row">
+          <label>
+            ブラウザ配信ページ
+            <input id="publisherUrl" readonly />
+          </label>
+          <button id="openPublisher" class="secondary" type="button">開く</button>
+        </div>
+
+        <div class="copy-row">
+          <label>
+            RTMP URL
+            <input id="rtmpUrl" readonly />
+          </label>
+          <button id="copyRtmp" class="secondary" type="button">コピー</button>
+        </div>
+
+        <div class="copy-row">
+          <label>
+            RTMP Server
+            <input id="rtmpServer" readonly />
+          </label>
+          <button id="copyRtmpServer" class="secondary" type="button">コピー</button>
+        </div>
+
+        <div class="copy-row">
+          <label>
+            RTMP Stream Key
+            <input id="rtmpStreamKey" readonly />
+          </label>
+          <button id="copyRtmpStreamKey" class="secondary" type="button">コピー</button>
+        </div>
+
+        <div class="copy-row">
+          <label>
+            視聴ページ
+            <input id="viewerUrl" readonly />
+          </label>
+          <button id="copyViewer" class="secondary" type="button">コピー</button>
+        </div>
+
+        <section class="admin-history">
+          <h2>過去のライブ</h2>
+          <label>
+            ライブ履歴
+            <select id="liveHistorySelect"></select>
+          </label>
+          <div id="liveHistoryDetail" class="history-detail">
+            <p class="notice">過去のライブを選択してください。</p>
+          </div>
+        </section>
+
+        <p id="adminNotice" class="notice"></p>
+      </section>
+    </main>
+    <script src="/admin.js"></script>
+  </body>
+</html>

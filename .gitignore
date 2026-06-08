@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+
+data/
+caddy/data/
+caddy/config/
+
+node_modules/
+npm-debug.log*
+
+Accept:
+GET
+Host:
+User-Agent:
+
+.DS_Store

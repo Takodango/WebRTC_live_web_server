@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Live Publisher</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="publisher-shell">
+      <section id="loginPanel" class="panel narrow">
+        <h1>配信者ログイン</h1>
+        <label>
+          管理トークン
+          <input id="tokenInput" type="password" autocomplete="current-password" />
+        </label>
+        <button id="loginButton" class="primary" type="button">ログイン</button>
+        <p id="loginError" class="error"></p>
+      </section>
+
+      <section id="publisherPanel" class="publisher-panel publisher-layout hidden">
+        <div class="publisher-topbar">
+          <div>
+            <p id="liveState" class="eyebrow">確認中</p>
+            <h1>ブラウザ配信</h1>
+          </div>
+          <button id="logoutButton" class="ghost" type="button">ログアウト</button>
+        </div>
+
+        <div class="publisher-workspace">
+          <div class="publisher-preview">
+            <section class="stage publisher-stage preview-disabled" aria-label="配信入力">
+              <video id="preview" autoplay muted playsinline></video>
+              <div id="cameraEmpty" class="empty publisher-preview-off">
+                <h1>Preview Off</h1>
+                <p id="notice">入力ソースを選択してください。</p>
+              </div>
+            </section>
+
+            <div class="publisher-stats" aria-label="配信状態">
+              <span id="statServer">サーバー: -</span>
+              <span id="statResolution">解像度: -</span>
+              <span id="statFrameRate">FPS: -</span>
+              <span id="statBitrate">通信量: -</span>
+              <span id="statCodec">Codec: -</span>
+              <span id="statServerBitrate">サーバー受信: -</span>
+              <span id="statLag">ラグ: -</span>
+            </div>
+          </div>
+
+          <aside class="publisher-side" aria-label="配信操作">
+            <section class="publisher-controls" aria-label="配信設定">
+              <div class="source-choice" aria-label="入力ソース">
+                <button id="sourceCameraChoice" class="secondary" type="button" data-source-choice="camera">カメラ</button>
+                <button id="sourceCaptureChoice" class="secondary" type="button" data-source-choice="capture">キャプチャ</button>
+              </div>
+
+              <div id="micSourcePanel" class="source-panel hidden">
+                <label>
+                  マイク
+                  <select id="audioSelect"></select>
+                </label>
+                <label class="inline-toggle">
+                  <input id="micEnabledCheckbox" type="checkbox" checked />
+                  マイクを使う
+                </label>
+              </div>
+
+              <div id="cameraSourcePanel" class="source-panel hidden">
+                <label>
+                  レンズ
+                  <select id="cameraSelect"></select>
+                </label>
+                <label class="zoom-control">
+                  ズーム <span id="zoomValue">1.0x</span>
+                  <input id="zoomRange" type="range" min="1" max="1" step="0.1" value="1" disabled />
+                </label>
+                <label class="focus-control">
+                  ピント <span id="focusValue">自動</span>
+                  <input id="focusRange" type="range" min="0" max="1" step="0.01" value="0" disabled />
+                </label>
+                <button id="cameraButton" class="secondary" type="button">カメラ開始</button>
+              </div>
+
+              <div id="captureSourcePanel" class="source-panel hidden">
+                <button id="screenButton" class="secondary" type="button">画面キャプチャ</button>
+                <p id="iosCaptureNotice" class="source-note hidden">
+                  iOSではWebページが画面収録映像を直接取り込めません。ReplayKit対応アプリか、iOS標準の画面収録で録画してください。
+                </p>
+              </div>
+            </section>
+
+            <details id="streamSettingsPanel" class="publisher-advanced hidden">
+              <summary>詳細設定</summary>
+              <label>
+                解像度
+                <select id="resolutionSelect">
+                  <option value="1280x720">1280 x 720</option>
+                  <option value="1920x1080">1920 x 1080</option>
+                  <option value="854x480">854 x 480</option>
+                  <option value="640x360">640 x 360</option>
+                </select>
+              </label>
+              <label>
+                FPS
+                <select id="frameRateSelect">
+                  <option value="30">30 fps</option>
+                  <option value="24">24 fps</option>
+                  <option value="15">15 fps</option>
+                  <option value="60">60 fps</option>
+                </select>
+              </label>
+              <label>
+                ビットレート
+                <select id="bitrateSelect">
+                  <option value="200000">0.2 Mbps</option>
+                  <option value="300000">0.3 Mbps</option>
+                  <option value="500000">0.5 Mbps</option>
+                  <option value="800000">0.8 Mbps</option>
+                  <option value="1000000">1 Mbps</option>
+                  <option value="1500000">1.5 Mbps</option>
+                  <option value="2000000">2 Mbps</option>
+                  <option value="2500000">2.5 Mbps</option>
+                  <option value="3000000">3 Mbps</option>
+                  <option value="4000000">4 Mbps</option>
+                  <option value="5000000">5 Mbps</option>
+                  <option value="6000000">6 Mbps</option>
+                  <option value="8000000">8 Mbps</option>
+                  <option value="10000000">10 Mbps</option>
+                </select>
+              </label>
+              <label>
+                圧縮方式
+                <select id="codecSelect">
+                  <option value="auto">自動</option>
+                  <option value="video/H264">H.264</option>
+                  <option value="video/VP8">VP8</option>
+                  <option value="video/VP9">VP9</option>
+                  <option value="video/AV1">AV1</option>
+                </select>
+              </label>
+            </details>
+
+            <details id="recordingSettingsPanel" class="publisher-advanced hidden">
+              <summary>録画設定</summary>
+              <label>
+                録画方式
+                <select id="recordingModeSelect">
+                  <option value="direct">高画質 カメラ直接</option>
+                  <option value="canvas">互換 配信映像</option>
+                </select>
+              </label>
+              <label>
+                録画解像度
+                <select id="recordingResolutionSelect">
+                  <option value="1280x720">1280 x 720</option>
+                  <option value="1920x1080">1920 x 1080</option>
+                  <option value="854x480">854 x 480</option>
+                  <option value="640x360">640 x 360</option>
+                </select>
+              </label>
+              <label>
+                録画FPS
+                <select id="recordingFrameRateSelect">
+                  <option value="30">30 fps</option>
+                  <option value="24">24 fps</option>
+                  <option value="15">15 fps</option>
+                  <option value="60">60 fps</option>
+                </select>
+              </label>
+              <label>
+                録画ビットレート
+                <select id="recordingBitrateSelect">
+                  <option value="500000">0.5 Mbps</option>
+                  <option value="1000000">1 Mbps</option>
+                  <option value="2000000">2 Mbps</option>
+                  <option value="4000000">4 Mbps</option>
+                  <option value="6000000">6 Mbps</option>
+                  <option value="8000000">8 Mbps</option>
+                  <option value="10000000">10 Mbps</option>
+                </select>
+              </label>
+              <p id="recordingStatus" class="recording-status">録画停止中</p>
+              <button id="recordingListButton" class="secondary" type="button">保存済み録画一覧</button>
+              <div id="recordingList" class="recording-list hidden" aria-label="保存済み録画一覧"></div>
+              <button id="shareRecordingButton" class="secondary hidden" type="button">端末に保存/共有</button>
+              <a id="downloadRecordingLink" class="download-link hidden" href="#" download>端末に保存</a>
+            </details>
+
+            <div id="commonActionPanel" class="publisher-actions hidden">
+              <button id="muteButton" class="secondary" type="button" disabled>ミュート</button>
+              <button id="pauseVideoButton" class="secondary" type="button" disabled>映像停止</button>
+              <button id="recordButton" class="secondary" type="button" disabled>録画開始</button>
+              <button id="publishButton" class="primary" type="button" disabled>配信開始</button>
+              <button id="stopButton" class="danger" type="button" disabled>停止</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+    <script src="/publish.js"></script>
+  </body>
+</html>

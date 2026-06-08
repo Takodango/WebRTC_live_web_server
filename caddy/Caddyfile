@@ -1,0 +1,31 @@
+{
+	admin off
+}
+
+{$PUBLIC_HOSTNAME} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+	}
+
+	reverse_proxy 127.0.0.1:{$APP_PORT}
+}
+
+https://{$LAN_HTTPS_HOST} {
+	tls internal
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+	}
+
+	reverse_proxy 127.0.0.1:{$APP_PORT}
+}
+
+http://{$LAN_HTTPS_HOST} {
+	redir https://{$LAN_HTTPS_HOST}{uri} permanent
+}

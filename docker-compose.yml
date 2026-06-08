@@ -1,0 +1,80 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      PUBLIC_HOSTNAME: "${PUBLIC_HOSTNAME:-localhost}"
+      LAN_HTTPS_HOST: "${LAN_HTTPS_HOST:-127.0.0.1}"
+      APP_PORT: "${APP_PORT:-7031}"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+    depends_on:
+      - app
+
+  app:
+    build: .
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      PORT: "${APP_PORT:-7031}"
+      PUBLIC_SCHEME: "${PUBLIC_SCHEME:-https}"
+      PUBLIC_HOST: "${PUBLIC_HOST:-localhost}"
+      ADMIN_TOKEN: "${ADMIN_TOKEN:-change-this-admin-token}"
+      PUBLISH_TOKEN: "${PUBLISH_TOKEN:-}"
+      STREAM_NAME: "${STREAM_NAME:-live}"
+      RTMP_INGEST_NAME: "${RTMP_INGEST_NAME:-live/rtmp}"
+      MEDIA_BASE_URL: "http://127.0.0.1:${MEDIAMTX_WEBRTC_HTTP_PORT:-8889}"
+      MEDIA_API_BASE_URL: "http://127.0.0.1:${MEDIAMTX_API_PORT:-9997}"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - mediamtx
+
+  rtmp-transcoder:
+    image: jrottenberg/ffmpeg:7.1-alpine320
+    restart: unless-stopped
+    network_mode: host
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          ffmpeg -hide_banner -loglevel error \
+            -thread_queue_size ${RTMP_THREAD_QUEUE_SIZE:-1024} \
+            -itsoffset ${RTMP_STABILITY_DELAY:-0.5} \
+            -i rtmp://127.0.0.1:${RTMP_PORT:-1935}/${RTMP_INGEST_NAME:-live/rtmp} \
+            -map 0:v:0 -map 0:a:0? \
+            -c:v copy \
+            -c:a libopus -b:a ${RTMP_OPUS_BITRATE:-96k} -ar 48000 -ac 2 \
+            -muxpreload ${RTMP_STABILITY_DELAY:-0.5} \
+            -muxdelay ${RTMP_STABILITY_DELAY:-0.5} \
+            -f rtsp -rtsp_transport tcp rtsp://127.0.0.1:${RTSP_PORT:-8554}/${STREAM_NAME:-live}
+          sleep 2
+        done
+    depends_on:
+      - mediamtx
+
+  lan-dns:
+    image: coredns/coredns:1.11.3
+    restart: unless-stopped
+    profiles: ["lan-dns"]
+    network_mode: host
+    command: ["-conf", "/Corefile"]
+    volumes:
+      - ./dns/Corefile:/Corefile:ro
+
+  mediamtx:
+    image: bluenviron/mediamtx:1
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      MTX_API: "yes"
+      MTX_APIADDRESS: "127.0.0.1:${MEDIAMTX_API_PORT:-9997}"
+      MTX_WEBRTCADDITIONALHOSTS: "${WEBRTC_ADDITIONAL_HOSTS:-192.168.1.10,your-domain.example}"
+      MTX_WEBRTCLOCALUDPADDRESS: ":${WEBRTC_ICE_PORT:-8189}"
+      MTX_WEBRTCLOCALTCPADDRESS: ":${WEBRTC_ICE_PORT:-8189}"
+      MTX_WEBRTCADDRESS: "127.0.0.1:${MEDIAMTX_WEBRTC_HTTP_PORT:-8889}"
+      MTX_RTMPADDRESS: ":${RTMP_PORT:-1935}"
+      MTX_RTSPADDRESS: ":${RTSP_PORT:-8554}"

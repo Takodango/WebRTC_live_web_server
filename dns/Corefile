@@ -1,0 +1,11 @@
+.:53 {
+  errors
+  cache 30
+
+  hosts {
+    192.168.1.10 your-domain.example
+    fallthrough
+  }
+
+  forward . 1.1.1.1 8.8.8.8
+}
